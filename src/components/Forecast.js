@@ -1,56 +1,63 @@
 // src/components/Forecast.js
 import React from 'react';
-import { Card, CardContent, Typography, Grid } from '@mui/material';
-import CloudIcon from '@mui/icons-material/Cloud';
-import WbSunnyIcon from '@mui/icons-material/WbSunny';
-import OpacityIcon from '@mui/icons-material/Opacity';
-import GrainIcon from '@mui/icons-material/Grain';
+import './Forecast.css';
+
+import { Card, CardContent, Typography, Grid, Paper } from '@mui/material';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Forecast = ({ forecast }) => {
-  console.log('Forecast data:', forecast);
-
   if (!forecast || !Array.isArray(forecast)) {
     return <div>No forecast data available</div>;
   }
 
-  const getWeatherIcon = (description) => {
-    switch (description) {
-      case 'clear sky':
-        return <WbSunnyIcon />;
-      case 'overcast clouds':
-      case 'broken clouds':
-      case 'scattered clouds':
-        return <CloudIcon />;
-      case 'rain':
-      case 'shower rain':
-        return <OpacityIcon />;
-      case 'snow':
-        return <GrainIcon />;
-      default:
-        return <CloudIcon />;
-    }
-  };
+  const data = forecast.slice(0, 7).map((day, index) => ({
+    day: `Day ${index + 1}`,
+    temperature: day.temperature.day,
+  }));
 
   return (
-    <Grid container spacing={2}>
-      {forecast.map((day, index) => (
-        <Grid item xs={12} sm={6} md={4} key={index}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Day {index + 1}</Typography>
-              <Typography variant="body1">Temp: {day.temperature.day} °C</Typography>
-              <Typography variant="body1">Min Temp: {day.temperature.minimum} °C</Typography>
-              <Typography variant="body1">Max Temp: {day.temperature.maximum} °C</Typography>
-              <Typography variant="body1">Weather: {day.condition.description} {getWeatherIcon(day.condition.description)}</Typography>
-              <Typography variant="body1">Humidity: {day.temperature.humidity} %</Typography>
-              <Typography variant="body1">Wind Speed: {day.wind.speed} m/s</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      ))}
-    </Grid>
+    <div className="forecast">
+      <Typography variant="h4" gutterBottom>7-Day Forecast</Typography>
+      <Grid container spacing={2}>
+        {forecast.slice(0, 7).map((day, index) => (
+          <Grid item xs={12} sm={6} md={4} key={index}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">{`Day ${index + 1}`}</Typography>
+                {day.condition.icon_url && (
+                  <img
+                    src={day.condition.icon_url}
+                    alt={day.condition.description}
+                    style={{ width: '50px', height: '50px' }}
+                  />
+                )}
+                <Typography variant="body1">
+                  {Math.round(day.temperature.minimum)}°/ <span>{Math.round(day.temperature.maximum)}°</span>
+                </Typography>
+                <Typography variant="body2">Weather: {day.condition.description}</Typography>
+                <Typography variant="body2">Humidity: {day.temperature.humidity}%</Typography>
+                <Typography variant="body2">Wind Speed: {day.wind.speed} m/s</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      <Typography style={{marginTop:'20px'}} variant="h4" gutterBottom>Temperature Trends</Typography>
+      <Paper style={{ padding: '16px', marginTop: '16px' }}>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="day" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="temperature" stroke="#8884d8" />
+          </LineChart>
+        </ResponsiveContainer>
+      </Paper>
+    </div>
   );
 };
 
 export default Forecast;
-

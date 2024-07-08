@@ -1,43 +1,60 @@
-// src/App.js
-import React, { useState } from 'react';
-import { Container, Typography } from '@mui/material';
-import SearchBar from './components/SearchBar';
-import CurrentWeather from './components/CurrentWeather';
-import Forecast from './components/Forecast';
-import { getWeatherData, getForecastData } from './services/WeatherServices';
-import TemperatureChart from './components/TemperatureChart';
+import React, { useState } from "react";
+import Forecast from "./components/Forecast";
+import CurrentWeather from "./components/CurrentWeather";
+import { getWeatherData, getForecastData } from "./services/WeatherServices";
+import { Button, TextField, Container, Typography, Alert } from "@mui/material";
+import './App.css';
 
-function App() {
-  const [weather, setWeather] = useState(null);
+const App = () => {
+  const [currentWeather, setCurrentWeather] = useState(null);
   const [forecast, setForecast] = useState(null);
+  const [city, setCity] = useState("");
+  const [error, setError] = useState(null);
 
-  const handleSearch = async (city) => {
+  const fetchWeatherData = async () => {
     try {
+      setError(null); // Clear previous errors
       const weatherData = await getWeatherData(city);
+      setCurrentWeather(weatherData);
+
       const forecastData = await getForecastData(city);
-      setWeather(weatherData); // Assuming weatherData is an object with current weather details
-      setForecast(forecastData.list); // Assuming forecastData.list is an array of forecast details
+      setForecast(forecastData);
     } catch (error) {
-      console.error(error.message);
-      alert('Failed to fetch weather data. Please try again.');
+      console.error("Error fetching weather data:", error);
+      setError("Failed to fetch weather data. Please check the city name and try again.");
     }
   };
 
   return (
-    <Container>
-      <Typography variant="h4" gutterBottom>
-        Weather Dashboard
-      </Typography>
-      <SearchBar onSearch={handleSearch} />
-      {weather && <CurrentWeather weather={weather} />}
-      {forecast && (
-        <>
-          <Forecast forecast={forecast} />
-        </>
-      )}
-    </Container>
-    
+    <div className="background">
+      <Container>
+        <div className="center-container">
+          <Typography variant="h4" gutterBottom>
+           Sai Weather Dashboard
+          </Typography>
+          <div className="search-container">
+            <TextField
+              label="City"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              variant="outlined"
+              style={{ marginRight: '8px' }}
+            />
+            <Button variant="contained" onClick={fetchWeatherData}>
+              Know your Weather
+            </Button>
+          </div>
+        </div>
+        {error && (
+          <Alert severity="error" style={{ marginTop: '16px' }}>
+            {error}
+          </Alert>
+        )}
+        {currentWeather && <CurrentWeather weather={currentWeather} />}
+        {forecast && <Forecast forecast={forecast} />}
+      </Container>
+    </div>
   );
-}
+};
 
 export default App;
