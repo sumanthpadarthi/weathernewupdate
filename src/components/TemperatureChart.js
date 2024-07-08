@@ -4,7 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 
 const TemperatureChart = ({ forecast }) => {
   if (!forecast || !Array.isArray(forecast)) {
-    return <div>No forecast Dfata available</div>;
+    return <div>No forecast Data available</div>;
   }
 
   // Adjust the mapping if necessary based on the data structure
